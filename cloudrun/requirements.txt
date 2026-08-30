@@ -1,0 +1,2 @@
+openbb==4.7.3
+uvicorn[standard]>=0.30,<1
