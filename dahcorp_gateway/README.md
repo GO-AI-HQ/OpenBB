@@ -33,12 +33,11 @@ The gateway obtains a short-lived Google ID token from the Cloud Run metadata se
 
 ## Container build
 
-Build context is the repository root:
+The `dahcorp_gateway` folder is a self-contained Cloud Run build context:
 
 ```bash
-gcloud builds submit \
-  --tag REGION-docker.pkg.dev/PROJECT_ID/REPOSITORY/dahcorp-openbb-gateway:latest \
-  -f dahcorp_gateway/Dockerfile .
+gcloud builds submit dahcorp_gateway \
+  --tag REGION-docker.pkg.dev/PROJECT_ID/REPOSITORY/dahcorp-openbb-gateway:latest
 ```
 
 Deploy the resulting image as a separate Cloud Run service and attach the dedicated DAHCorp service account. The gateway service may allow unauthenticated ingress because every market-data route independently requires a valid DAHCorp signature; the upstream OpenBB service remains private.
