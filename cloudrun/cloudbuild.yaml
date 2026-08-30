@@ -35,6 +35,3 @@ steps:
       - --max-instances
       - '1'
       - --quiet
-
-images:
-  - us-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/openbb/dahcorp-openbb:$COMMIT_SHA
