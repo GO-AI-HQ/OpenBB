@@ -1,0 +1,40 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  - name: gcr.io/k8s-skaffold/pack
+    entrypoint: pack
+    args:
+      - build
+      - us-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/openbb/dahcorp-openbb:$COMMIT_SHA
+      - --builder
+      - gcr.io/buildpacks/builder:latest
+      - --network
+      - cloudbuild
+      - --path
+      - cloudrun
+      - --publish
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - dahcorp-openbb
+      - --image
+      - us-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/openbb/dahcorp-openbb:$COMMIT_SHA
+      - --region
+      - us-east1
+      - --platform
+      - managed
+      - --no-allow-unauthenticated
+      - --ingress
+      - all
+      - --min-instances
+      - '0'
+      - --max-instances
+      - '1'
+      - --quiet
+
+images:
+  - us-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/openbb/dahcorp-openbb:$COMMIT_SHA
