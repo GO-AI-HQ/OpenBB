@@ -4,18 +4,25 @@ A narrow Cloud Run gateway for DAHCorp Finance. It exposes only three read-only 
 
 ## Public surface
 
-- `GET /health` — no secret required; returns only service health.
-- `GET /v1/quote` — requires `X-DAHCORP-GATEWAY-SECRET`.
-- `GET /v1/history` — requires `X-DAHCORP-GATEWAY-SECRET`.
-- `GET /v1/dividends` — requires `X-DAHCORP-GATEWAY-SECRET`.
+- `GET /health` — public health check only.
+- `GET /v1/quote` — requires a valid DAHCorp Ed25519 request signature.
+- `GET /v1/history` — requires a valid DAHCorp Ed25519 request signature.
+- `GET /v1/dividends` — requires a valid DAHCorp Ed25519 request signature.
 
 Only the `yfinance` OpenBB provider is accepted. The gateway is not a generic proxy.
 
-## Required runtime configuration
+## Authentication model
+
+Netlify holds the Ed25519 **private signing key** in its encrypted environment. The gateway contains only the matching **public verification key**, which is safe to commit. Each request signs the HTTP method, path, exact query string, timestamp, and nonce. Requests outside a 90-second window or with an invalid signature are rejected.
+
+No shared application secret and no Google service-account JSON key are required in Netlify.
+
+## Runtime configuration
+
+The service has a default upstream target for the current DAHCorp OpenBB Cloud Run deployment. These values remain overridable with:
 
 - `OPENBB_UPSTREAM_URL` — private OpenBB Cloud Run service URL.
 - `OPENBB_UPSTREAM_AUDIENCE` — normally the same private Cloud Run service URL.
-- `DAHCORP_GATEWAY_SECRET` — high-entropy app-to-app secret. Prefer mounting from Google Secret Manager.
 - `OPENBB_MARKET_PROVIDER=yfinance`
 
 ## Google IAM
@@ -34,6 +41,4 @@ gcloud builds submit \
   -f dahcorp_gateway/Dockerfile .
 ```
 
-Deploy the resulting image as a separate Cloud Run service. The gateway Cloud Run service can allow unauthenticated ingress because application requests are separately authenticated by the DAHCorp gateway secret; the upstream OpenBB service remains private.
-
-For production, store `DAHCORP_GATEWAY_SECRET` in Secret Manager and expose it to this service as an environment secret rather than putting the secret in source or a build command.
+Deploy the resulting image as a separate Cloud Run service and attach the dedicated DAHCorp service account. The gateway service may allow unauthenticated ingress because every market-data route independently requires a valid DAHCorp signature; the upstream OpenBB service remains private.
