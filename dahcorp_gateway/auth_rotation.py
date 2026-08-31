@@ -11,7 +11,7 @@ from v3 import app
 # only in the DAHCorp Netlify runtime. Keeping the rotation in this thin module
 # lets every existing v1/v2/v3 route use the new key without changing the
 # gateway's route contracts.
-_ROTATED_DAHCORP_PUBLIC_KEY_B64 = "MCowBQYDK2VwAyEAk35jhO+U3Puj6mFmNLUHftsaXpK1JrnsRqPqyhP7DEM="
+_ROTATED_DAHCORP_PUBLIC_KEY_B64 = "MCowBQYDK2VwAyEA1eOQefvkYNjBaBlgO+hZazjA+1/nO0XXMoesNL6BUuU="
 
 _rotated_key = serialization.load_der_public_key(base64.b64decode(_ROTATED_DAHCORP_PUBLIC_KEY_B64))
 if not isinstance(_rotated_key, Ed25519PublicKey):
